@@ -56,3 +56,34 @@
                특허관리시스템, 
       경영관리부서 - 전사자원관리시스템(ERP) 
 
+3. 쿼리 입문
+  3.1 sakila schema
+      DVD 대여점 체인을 설계한 것임.
+
+  3.2 sakila schema의 테이블
+      film      : 출시되어 대여할 수 있는 영화(DVD)
+      actor     : 영화에 출연하는 배우
+      customer  : 영화 고객
+      category  : 장르
+      payment   : 영화 대여료
+      language  : 영화 언어
+      film_actor: 출연 배우
+      inventory : 대여 가능 여부
+
+  3.3 SQL 문장의 종류
+      - DML(데이터 조작 언어)
+        select : 조회, update : 수정, delete : 삭제, insert : 추가 등록
+
+        가장 많이 사용하는 것은 select
+        가장 어려운 sql 작성 문장이 select : 다중 테이블을 조회, 검색 속도 => 튜닝
+
+      - select 절 ( 표 3-1 참고 )
+        select    : 칼럼1, 칼럼2, 칼럼3
+          from    : table1, table2
+         where    : 조회 조건 ( and, or, >, <, =, between 등, sub query)
+         group by : 데이터를 그룹핑해서 조회하는 조건
+         having   : 그룹핑 된 결과에서 추가적으로 조건 검색
+         order by : 정렬( 칼럼기준, 연산 결과 기준 등 )
+
+  3.4 from 절
+  
