@@ -1,3 +1,7 @@
+/*
+    self join 실습용 Table
+*/
+
 use sakila;
 
 CREATE TABLE EMP
