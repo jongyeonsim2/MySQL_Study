@@ -1,0 +1,129 @@
+1. VIEW 사용 목적
+   - 데이터 보안
+   - Select sql을 좀 더 쉽게 사용하기 위함.
+     재사용성, 유지보수성
+   - 복잡성을 낮추기 위함
+
+2. View 생성 방법
+   create view view_name ( col1, col2... ) as
+   select ( col1, col2... ) from table_name;
+
+3. table, View 에 대한 사용 권한 제어
+   - 현재는 root 유저를 사용 중임.
+   - customer_v 생성후에 
+     예를 들어서 데이베이스 사용자를  marketing user,
+          insa user, other user 생성.
+     other user : customer_v 사용하게 끔함.
+                  기존에 customer table 의 select 권한 회수.
+
+4. 갱신 가능한 뷰의 작성 기준
+   p.325 참조
+
+   갱신이 가능하다 => update 를 지칭.
+                     update가 되는 것을 확인하더라도,
+                     insert 가 되는것을 보장하는 건 아님.
+
+   insert 가 되는 view 를 작성하려면,
+   p.325 의 조건에 추가적인 조건이 필요함.
+
+   추가적인 조건이라 함은 제약 조건이 만족되어야 함.
+   null 제약 조건에서 not null 에 해당하는 칼럼은 반드시
+   view 에 있어야 함.
+
+   현재의 customer_v 는 null 제약 조건에 해당하는 모든 칼럼이
+   없는 상태임. => insert 가 되지 않음.
+
+
+5. insert, update, delete 사용법
+    
+  insert into table_name( col1, col2.... )
+  values ( 값1, 값2 .... );
+
+  update table_name
+     set col1 = 값1,
+         col2 = 값2
+   where col3 = 값;
+
+  update시 where 조건이 없으면, 대상 테이블의 전체 데이터가 대상됨.
+
+  delte from table_name
+   where col1 = 값;
+
+  delete시 where 조건이 없으면, 대상 테이블의 전체 데이터가 대상됨.
+
+  insert, update, delete  를 수행 후 정상이면, 트랜잭션 종료.( commit )
+                                    비정상이면, 트랜잭션 종료.( rollback )
+
+  현재의 mysql은 auto commit 상태임으로, 명시적으로 트랜잭션관리를 
+  하지 않고 있음.
+
+  트랜잭션(transaction) : 비즈니스 레벨의 업무 처리 단위.
+  어떤 업무가 처리되기 위해서 여러 개의 sql이 복합적으로 실행 되는 경우.
+
+
+  트랜잭션 #1
+
+  start transaction -> 
+  select -> update -> insert -> delete -> commit or rollback ( A 사용자 )
+
+  트랜잭션 하나, 업무 처리의 단위.
+
+  트랜잭션 #2
+
+  start transaction -> 
+  select -> update -> insert -> delete -> commit or rollback ( B 사용자 )
+
+  트랜잭션 하나, 업무 처리의 단위.
+
+
+  6. 제약조건
+     - 기본키 제약조건
+       primary key : 해당 테이블에서 row를 식별하는 식별자.
+                     유일(unique), not null
+     - 외래키 제약조건
+       foreign key : 다른 테이블의 기본키의 값을 참조.
+                    다른 테이블의 기본키가 아닌 값을 참조는 할 수 없음.
+                    insert(추가), update(변경) 시
+                    다른 테이블의 기본키의 값이 아닌 값으로 추가 및 변경은
+                    안됨.
+     - 고유 제약 조건
+       unique key : PK는 아니지만, 해당 칼럼의 값이 유일(unique)해야 함.
+     - 체크 제약 조건
+       해당 칼럼의 값은 지정된 값만 가능.
+
+
+     create table customer (
+        customer_id smallint ussigned not null auto_increment,
+        ......,
+        primary key(customer_id), /*기본키 제약조건*/
+
+        /*외래키 제약조건*/
+        constraint fk_customer_address foreign key (address_id)
+          references address (address_id) on delete restrict 
+                                          on update cascade,
+
+        on delete restrict
+           : 부모(address) 에서 row 삭제시, 삭제 되는 row의 address_id 가
+             자식(customer) 에서 참조(사용)되고 있는 상태이면,
+             부모(address)의 row 데이터를 삭제할 수 없음. 에러 발생.
+
+             고아 데이터가 발생하지 않도록 하기 위함.
+
+        on update cascade
+           : 부모(address) 에서 row 수정시, 수정되는 row의 address_id 가
+             자식(customer) 에서 참조(사용)되고 있는 상태이면,
+             자식과 함께 수정이 됨.
+
+         transaction : row level transaction 관리를 위해서 제공되는
+             데이터베이스 엔진을 사용. InnoDB 를 사용.
+     )
+
+7. 자료형
+   - float(p, s) 
+     p 는 정밀도, s 는 척도.
+
+     어떤 칼럼의 자료형을 float(4,2) 의 부동소수점으로 지정.
+     insert 시, 27.44 정상적으로 insert가 되지만,
+     17.8675 로 insert 하는 경우는 17.87 로 반올림이 되어 insert 됨.
+
+     insert 시 178.375 인 경우는 오류가 발생.
