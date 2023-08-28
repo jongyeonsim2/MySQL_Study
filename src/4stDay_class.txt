@@ -180,10 +180,44 @@
         상태가 됨. 즉, 데이터가 잠기게 되는 것임.
 
         row level : 읽기 일관성 + row level lock
+
+           update dept
+              set dname = '111111'
+            where deptno = 50; /* 부서번호가 50번인 데이터만 => 한 행 */
+
            => 트랜잭션의 크기도 설계시 고려의 대상임.
            => 네트워크의 속도에 따라 트랜잭션의 성능에 영향이 될 수 있음.
            => 동시접속자수도 고려해야 함.
            => 웹 서버와 DB 서버를 종합적으로 고려해야 함.
            => 클라우드에서 부하테스트 후 운영할 서버의 한계점을 파악.
            
-        table level : 
+        table level : 읽기 일관성 + row level lock + 교착 상태
+           session A : table lock ( 해당 테이블 모든 )
+                update dept
+                   set dname = '111111'; 
+                   ( 조건절이 없음. 모든 행이 대상. => table lock )
+           session B 
+                update dept
+                   set loc = 'busan'
+                 where deptno = 50; 
+                   ( 트랜잭션이 완료되기 전까지는 row level lock
+                     트랜잭션이 완료되기 전까지 약 10분 정도 대기.
+                     => mysql 서버에서 교착상태라고 판단을 하고, 
+                        rollback 시킴.
+                    )
+           session C 
+                update dept
+                   set loc = 'busan'
+                 where deptno = 40; 
+                   ( 트랜잭션이 완료되기 전까지는 row level lock )
+
+      - 교착상태( deadlock )
+        두 개의 서로 다른 세션에서 트랜잭션이 진행중일 때,
+        다른 세션에서 트랜잭션이 해당 리소스를 대기할 발생.
+
+        서버에서 감시를 한 후, 일정 시간이 지나면, 
+        ( Lock wait timeout exceeded ), rollback 시킴.
+
+   8.4 세이브포인트
+        트랜잭션 내에 하나 이상의 세이브포인트를 설정.
+        이를 사용해서 트랜잭션의 특정 위치로 롤백할 수 있음.
