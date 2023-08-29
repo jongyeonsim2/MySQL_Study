@@ -381,4 +381,88 @@ select userId, name, getAgeFunc(birthYear) as '현재 나이'
 
 
 
-  
+
+
+
+   2.5 커서 procedure 실습
+
+       2.5.1 개요
+           테이블에서 여러 개의 행을 쿼리한 후에 퀴리의 결과인 행 집합에서
+          한 생씩 처리 하기 위한 방식임.
+
+       2.5.2 처리 단계
+          커서 declare -> 커서 open -> 커서 fetch -> 커서 close
+          커서 fetch : 가져온 한 row에서 대해 데이터 처리를 수행.
+
+       2.5.3 실습
+
+       /* 실습 내용
+       
+          고객 정보 테이블에 고객 등급 칼럼을 추가 후 등급 관리를 하려고 함
+       
+          대량의 고객 정보를 업데이트 하기위한 프로시저용임.
+
+          10만명의 고객에 대한 한 명 한 명의 등급 계산이 필요함.
+          그래서, 한 row 를 대상으로 반복 작업을 해야하는 경우, 
+          cursor 를 사용하면 편리함.
+       */
+
+
+alter table userTbl add grade varchar(5);
+    
+drop procedure if exists gradeProc;
+delimiter $$
+create procedure gradeProc()
+begin
+	declare id varchar(10); -- 사용자 ID
+    declare sumOfAmount bigint; -- 총 구매 금액
+    declare userGrade char(5);
+    
+    -- 커서의 제어를 위한 변수 설정. 커서의 끝인지에 대한 여부에 따라 처리를 구분.
+    declare endOfRow boolean default false;
+    
+    -- 커서 선언
+    declare userCursor cursor for
+		select u.userid, sum(price*amount)
+		  from buyTbl b
+			right outer join userTbl u
+			on b.userid = u.userid
+		  group by u.userid, u.name;
+
+    -- 커서의 핸들링 제어 설정
+    declare continue handler
+		for not found set endOfRow = true; -- 커서의 끝이면, 
+        
+	-- 커서의 open
+    open userCursor;
+    
+    -- 반복문에 이름을 설정해서 반복문을 작성.
+    grade_loop: loop
+		
+        -- 커서에서 한 row 씩 가져옴.
+        fetch userCursor into id, sumOfAmount;
+        
+        if endOfRow then
+			leave grade_loop;
+		end if;
+        
+        case
+			when (sumOfAmount >= 1500) then set userGrade = '최우수고객';
+            when (sumOfAmount >= 1000) then set userGrade = '우수고객';
+            when (sumOfAmount >= 1) then set userGrade = '일반고객';
+            else set userGrade = '유령고객';
+		end case;
+            
+        update userTbl set grade = userGrade where userId = id;
+    end loop grade_loop;
+
+end $$
+delimiter ;
+
+
+call gradeProc();
+
+select * from userTbl;
+
+
+
