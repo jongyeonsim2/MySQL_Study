@@ -297,3 +297,47 @@ delimiter ;
 call gugudanProc();
 
 select * from gugudanTBL;
+
+
+
+
+
+
+      2.5.6 동적SQL이 있는 프로시저
+            상황에 따라 내용 변경이 실시간으로 필요한 경우에
+            동적SQL을 사용하여, 실시간으로 실행해서 사용.
+
+drop procedure if exists dynamicSqlProc;
+delimiter $$
+create procedure dynamicSqlProc(
+	in tblName varchar(20) -- 테이블 명
+)
+begin
+    -- from 절 다음에 반드시 공백이 필요함. 테이블과의 구분을 위함.
+	set @sqlQuery = concat('select * from ', tblName);
+    
+    prepare myQuery from @sqlQuery; -- sql 실행하기 위한 준비, 
+									-- 테이블 존재 유무, 권한 체크 등
+    execute myQuery;
+    deallocate prepare statement;
+    
+end $$
+delimiter ;
+
+call dynamicSqlProc('customer');
+
+
+
+
+
+
+
+   2.5 스토어드 function 실습
+
+
+   
+
+
+
+
+
