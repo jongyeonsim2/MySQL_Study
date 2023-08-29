@@ -589,6 +589,32 @@ show triggers from sakila;
   /* 고객 정보 신규 등록시 에러 발생 트리거
    insert event
  */
+ drop trigger if exists backUserTbl_InsertTrg_err;
+ delimiter $$
+ create trigger backUserTbl_InsertTrg_err
+   after insert  -- update 가 된 후 동작을 지정.
+   on userTbl    -- trigger 가 부착될 대상 table
+   for each row  -- 모든 row 대상
+begin
+    -- 에러 발생 및 메세지 출력
+	signal sqlstate '45000'
+		set message_text = '데이터가 입력됨. 서버에 기록됨.';
+end $$
+delimiter ;
+
+
+show triggers from sakila;
+
+
+insert into userTbl 
+values('AAB', 'AAB', 2004, 'AA', '010', '11111111', 170,
+		'2019-12-01', '유령고객');
+        
+/*
+14:46:18	insert into userTbl  values('AAB', 'AAB', 2004, 'AA', '010', '11111111', 170,   '2019-12-01', '유령고객')	
+Error Code: 1644. 데이터가 입력됨. 서버에 기록됨.	0.000 sec
+*/
+
 
 
 
@@ -599,4 +625,3 @@ show triggers from sakila;
  */
 
 
- 
