@@ -466,3 +466,55 @@ select * from userTbl;
 
 
 
+
+
+
+3. 트리거( Trigger )
+   3.1 개요
+       테이블에 삽입(insert), 수정(update), 삭제(delete) 등의 작업(이벤트) 가 발생할 때
+       자동으로 작동되는 개체임.
+
+       테이블에 부작되는 이벤트 기반의 프로그램 코드라고 생각하면 됨.
+
+   3.2 대표적 용도
+       - 백업용
+         어떤 테이블에서 row를 삭제(delete)할 경우, 삭제되는 데이터를 어딘가에 백업을 받아야 함.
+         delete -> 백업 table에 insert => 트리거라는 것에 백업 동작이 실행되도록 작성.
+
+       - 모니터링
+         인사 테이블에서 데이터가 수정(update)이 되면, 투가 수정했는지의 정보를 기록.
+
+       - 비즈니스 프로세스 단계 처리용
+         쇼핑몰에서 구입, 재고, 배송은 하나의 비즈니스 프로세스임.
+
+         고객이 쇼핑몰에서 물건을 구입 -> 구입 table에 데이터가 insert ->
+         -> 재고 테이블에서 고객이 구매한 수량만큼 차감(update) ->
+         -> 배송 테이블에 데이터가 insert 
+
+         insert -> update -> insert ( sql 문장이 3개 ) 대신에
+         트리거로 처리가 가능함.( 다중 트리거 )
+
+   3.3 형식
+       - trigger time : 이벤트(insert, update, delete) 발생 전
+                        이벤트(insert, update, delete) 발생 후
+       - trigger event : insert, update, delete
+
+
+   3.4 실습
+
+/* 실습용 table */
+CREATE TABLE backup_userTbl
+( userID  char(8) NOT NULL PRIMARY KEY, 
+  name    varchar(10) NOT NULL, 
+  birthYear   int NOT NULL,  
+  addr	  char(2) NOT NULL, 
+  mobile1	char(3), 
+  mobile2   char(8), 
+  height    smallint,  
+  mDate    date,
+  modType  char(2), -- 변경된 타입. '수정' 또는 '삭제'
+  modDate  date, -- 변경된 날짜
+  modUser  varchar(256) -- 변경한 사용자
+);
+
+
