@@ -498,6 +498,7 @@ select * from userTbl;
        - trigger time : 이벤트(insert, update, delete) 발생 전
                         이벤트(insert, update, delete) 발생 후
        - trigger event : insert, update, delete
+       - event 전후 데이터 지시자 : old( event 전 ), new( event 후 )
 
 
    3.4 실습
@@ -564,6 +565,24 @@ show triggers from sakila;
  /* 고객 정보 삭제시 백업 및 모니터링용 트리거
    delete event
  */
+ drop trigger if exists backUserTbl_DelTrg;
+ delimiter $$
+ create trigger backUserTbl_DelTrg
+   after delete  -- update 가 된 후 동작을 지정.
+   on userTbl    -- trigger 가 부착될 대상 table
+   for each row  -- 모든 row 대상
+begin
+	-- 백업용임으로 update 전의 데이터를 백업.
+	insert into backup_userTbl 
+    values ( old.userId, old.name, old.birthYear,
+		old.addr, old.mobile1, old.mobile2, old.height,
+        old.mDate, '삭제', curdate(), current_user() );
+end $$
+delimiter ;
+
+show triggers from sakila;
+
+
 
 
 
@@ -573,6 +592,11 @@ show triggers from sakila;
 
 
 
+
+
   /* 고객 정보 신규 등록시 태어난 연도 validation 용 트리거
    insert event
  */
+
+
+ 
