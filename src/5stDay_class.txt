@@ -624,4 +624,29 @@ Error Code: 1644. 데이터가 입력됨. 서버에 기록됨.	0.000 sec
    insert event
  */
 
+-- 기존의 insert trigger 먼저 삭제해야 함.
+drop trigger backUserTbl_InsertTrg_err;
 
+drop trigger if exists backUserTbl_InsertTrg;
+ delimiter $$
+ create trigger backUserTbl_InsertTrg
+   before insert  -- insert 되기 전 동작을 지정.
+   on userTbl    -- trigger 가 부착될 대상 table
+   for each row  -- 모든 row 대상
+begin
+    -- 태어난 연도 validation check
+    if new.birthYear < 1900 then
+		set new.birthYear = 0;
+    elseif new.birthYear > year(curdate()) then
+		set new.birthYear = year(curdate());
+    end if;
+end $$
+delimiter ;
+
+show triggers from sakila;
+
+insert into userTbl 
+values('ABB', 'ABB', 1800, 'AA', '010', '11111111', 170,
+		'2019-12-01', '유령고객');
+        
+select * from userTbl where userId = 'ABB';
