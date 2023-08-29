@@ -650,3 +650,45 @@ values('ABB', 'ABB', 1800, 'AA', '010', '11111111', 170,
 		'2019-12-01', '유령고객');
         
 select * from userTbl where userId = 'ABB';
+
+
+
+
+
+
+/* 비즈니스 프로세스 단계 처리용 
+
+orderTbl( insert 발생 )  :  재고 테이블에서 수량 차감.(prodTbl 에서 update 가 발생.)
+-> prodTbl( update 발생 )  : 배송 테이블에 배송 시작을 위해서 데이터 등록 ( deliverTbl에서 insert 가 발생.)
+-> deliverTbl
+
+insert -> update -> insert 
+
+*/
+
+-- 재고 테이블에 테스트용 데이터 등록
+insert into prodTbl values('사과', 100);
+insert into prodTbl values('배', 100);
+insert into prodTbl values('귤', 100);
+
+
+ drop trigger if exists orderTrg;
+ delimiter $$
+ create trigger orderTrg
+   after insert  -- insert 되기 전 동작을 지정.
+   on orderTbl    -- trigger 가 부착될 대상 table
+   for each row  -- 모든 row 대상
+begin
+    -- 재고 테이블에서 수량 차감(update)
+    -- new.orderamount : orderTbl 칼럼
+    update prodTbl set account = account - new.orderamount
+     where prodName = new.prodname;
+end $$
+delimiter ;
+
+show triggers from sakila;
+
+
+
+
+
