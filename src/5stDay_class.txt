@@ -102,4 +102,25 @@ INSERT INTO buyTbl VALUES(NULL, 'BBK', '운동화', NULL   , 30,   2);
 
        select @retutnVal;
 
-       
+   2.5 스토어드 프로시저 실습
+
+
+drop procedure if exists userProc; //기존 프로시저의 수정이 필요해서
+                                  // 기존 프로시저를 먼저 삭제를 해야하는 경우.
+
+delimiter $$                       // SQL 문장의 끝을 지시하는 문자
+                                   // 지금 작성중인 프로시저의 컴파일이 끝날 때 까지는
+                                   // 기존의 ;  대신에 $$  로 사용하겠다는 의미.
+
+create procedure userProc()        // procedere 가 시작되는 부분.
+begin
+	select * from userTbl;
+end $$                            // $$ 만나면, 여기서 프로시저가 끝나는 것을 
+                                  // 알려주는 것과 동일.
+
+
+delimiter ;                      // 기존에 사용하는 지시문자( ; )로 변경. 
+
+call userProc();                 // 프로시저가 정상적으로 컴파일이 되면,
+                                  // mysql 서버에 객체로 등록이 되고,
+                                  // 이제부터 스토어드 프로시저를 호출해서 사용할 수 있음.
