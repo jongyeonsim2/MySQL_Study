@@ -728,8 +728,16 @@ select * from prodTbl;
 select * from deliverTbl;
 
 insert into orderTbl values (null, 'cus1', '배', 5);
+=> 다중 트리거가 실행되어, 아래의 #1, #2 번이 순차적으로 실행됨.
 
+#1
+orderTbl 에서 insert event 발생 ->  orderTrg 트리거가 실행.
+prodTbl 의 '배' 상품의 재고가 100 에서 95로 변경되어 있음을 확인.
 
+#2
+prodTbl 에서 update event 가 발생 -> prodTrg 트리거가 실행.
+deliverTbl 에서 신규 배송 상품인 '배' 가 5개 배송이 되어야 함을 나타내는 
+데이터가 등록됨.
 
 
 
