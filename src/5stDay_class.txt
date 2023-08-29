@@ -183,7 +183,8 @@ create table if not exists testTBL (
     txt char(10)
 );
 
-
+call userProc3('테스트값', @outValue);
+select @outValue;
 
 
 
