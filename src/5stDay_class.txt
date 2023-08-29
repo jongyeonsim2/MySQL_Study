@@ -104,6 +104,7 @@ INSERT INTO buyTbl VALUES(NULL, 'BBK', '운동화', NULL   , 30,   2);
 
    2.5 스토어드 프로시저 실습
 
+      2.5.1 매개변수가 없는 프로시저
 
 drop procedure if exists userProc; //기존 프로시저의 수정이 필요해서
                                   // 기존 프로시저를 먼저 삭제를 해야하는 경우.
@@ -124,3 +125,65 @@ delimiter ;                      // 기존에 사용하는 지시문자( ; )로 
 call userProc();                 // 프로시저가 정상적으로 컴파일이 되면,
                                   // mysql 서버에 객체로 등록이 되고,
                                   // 이제부터 스토어드 프로시저를 호출해서 사용할 수 있음.
+
+
+
+
+      2.5.2 in 매개변수가 있는 프로시저
+
+drop procedure if exists userProc1;
+delimiter $$
+create procedure userProc1( in userName varchar(10) )
+begin
+  select * from userTbl where name = userName;
+end $$
+delimiter ;
+
+call userProc1('조관우');
+
+
+
+
+
+
+drop procedure if exists userProc2;
+delimiter $$
+create procedure userProc2( 
+	in userBirth int,
+    in userHeight int
+ )
+begin
+  select * from usertbl
+   where birthYear > userBirth and height > userHeight;
+end $$
+delimiter ;
+
+call userProc2(1970, 178);
+
+
+
+
+      2.5.3 in, out 매개변수가 있는 프로시저
+
+
+drop procedure if exists userProc3;
+delimiter $$
+create procedure userProc3( 
+	in textValue char(10),
+    out outValue int
+ )
+begin
+  insert into testTBL values(null, textValue);
+  select max(id) into outValue from testTBL;
+end $$
+delimiter ;
+
+create table if not exists testTBL (
+	id int auto_increment primary key,
+    txt char(10)
+);
+
+
+
+
+
