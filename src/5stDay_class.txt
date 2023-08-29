@@ -692,3 +692,32 @@ show triggers from sakila;
 
 
 
+
+
+
+
+ drop trigger if exists prodTrg;
+ delimiter $$
+ create trigger prodTrg
+   after update  -- insert 되기 전 동작을 지정.
+   on prodTbl    -- trigger 가 부착될 대상 table
+   for each row  -- 모든 row 대상
+begin
+    -- 배송 시작을 위해서 배송 테이블에 데이터 등록 ( insert )
+    -- 배송 수량 계산 필요
+    declare orderAmount int;
+    
+    set orderAmount = old.account - new.account;
+    
+    insert into deliverTbl(prodName, account)
+    values(new.prodName, orderAmount);
+end $$
+delimiter ;
+
+show triggers from sakila;
+
+
+
+
+
+
