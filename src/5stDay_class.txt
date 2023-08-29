@@ -721,3 +721,16 @@ show triggers from sakila;
 
 
 
+
+-- 주문 테이블에 test 용 데이터 등록
+select * from orderTbl;
+select * from prodTbl;
+select * from deliverTbl;
+
+insert into orderTbl values (null, 'cus1', '배', 5);
+
+
+
+
+
+
